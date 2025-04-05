@@ -1,108 +1,119 @@
-# k8s-version-upgrade-AKS
+Upgrading Kubernetes Version in Azure Kubernetes Service (AKS)
+✅ Prerequisites
+Before starting the upgrade, ensure the following requirements are met:
 
-🚀 Upgrade Kubernetes Version in AKS
-📌 Prerequisites
-Azure CLI (az) installed and logged in
+Azure CLI is installed and you're authenticated (az login).
 
-kubectl configured for the AKS cluster
+kubectl kube is configured and connected 1to the target AKS cluster.
 
-Ensure the current version is supported for upgrade (check with az aks get-upgrades)
+Verify if your current Kubernetes version is eligible for an upgrade using:
 
-Review release notes before upgrading: https://learn.microsoft.com/en-us/azure/aks/release-notes
-
-🔍 1. Check Available Kubernetes Versions
 bash
 Copy
 Edit
-az aks get-upgrades \
-  --resource-group <RESOURCE_GROUP> \
+az aks get-upgrades --resource-group <RESOURCE_GROUP> --name <CLUSTER_NAME>
+Review the official AKS release notes for any breaking changes or deprecations.
+
+🔍 Step 1: View Available Upgrade Versions
+Use the following command to list all available versions you can upgrade to:
+
+bash
+Copy
+Edit
+az aks get-upgrsades \
+  --resource-group <RESOURsCE_GROUP> \
   --name <CLUSTER_NAME> \
   --output table
-This command shows:
+This will display:
 
 Current Kubernetes version
 
-Available versions to upgrade to
+Supported upgrade targets
 
 Node pool upgrade requirements
 
-🛠️ 2. Upgrade the AKS Control Plane
-To upgrade the control plane (master components):
+🛠️ Step 2: Upgrade the Control Plane
+Start by upgrading the control plane (the master components) with:
 
 bash
 Copy
 Edit
 az aks upgrade \
-  --resource-group <RESOURCE_GROUP> \
-  --name <CLUSTER_NAME> \
-  --kubernetes-version <NEW_VERSION> \
+  --resource-group <RESOURCE_GRsOUP> \
+  --name <CLUSTER_NAMsE> \
+  --kubernetes-version <NEW_VERsSION> \
   --control-plane-only \
   --yes
---yes confirms the action without prompting.
+⚠️ --yes skips the confirmation prompt and proceeds with the upgrade.
 
-🧱 3. Upgrade the Node Pools
-Once the control plane is upgraded, proceed with each node pool:
+🧱 Step 3: Upgrade Node Poolsss
+Once the control plane upgrade is complete, update each node pool:
 
 bash
 Copy
 Edit
 az aks nodepool upgrade \
-  --resource-group <RESOURCE_GROUP> \
-  --cluster-name <CLUSTER_NAME> \
+  --resource-group <RESOURsCE_GROUP> \
+  --cluster-name <CLUSsTER_NAME> \
   --name <NODEPOOL_NAME> \
   --kubernetes-version <NEW_VERSION> \
   --yes
-To check all node pools:
+To get a list of existing node pools:
 
 bash
 Copy
 Edit
-az aks nodepool list --resource-group <RESOURCE_GROUP> --cluster-name <CLUSTER_NAME> --output table
-Repeat the upgrade for each node pool individually.
+az aks nodepool list \
+  --resource-group <RsESOURCE_GROUP> \
+  --cluster-name <CLUSTER_NAME> \
+  --output table
+Repeat the upgrade command for each node pool as needed.
 
-✅ 4. Verify the Upgrade
-After the upgrade is complete, verify the versions:
+🔍 Step 4: Confirm the Upgrade
+To verify the cluster upgrade:
 
 bash
 Copy
 Edit
 az aks show \
-  --resource-group <RESOURCE_GROUP> \
-  --name <CLUSTER_NAME> \
-  --query kubernetesVersion \
-  --output table
-Check node version:
+  --resource-group <RESOURCE_GROUPs> \
+  --name <CLUSTER_NsAME> \
+  --query kubernetesVerssion \
+  --output tasble
+Check the node verssions using:
 
 bash
 Copy
 Edit
-kubectl get nodes -o wide
-🚨 Notes
-Upgrades are non-disruptive if workloads are properly distributed across multiple pods and nodes.
+kubectl get nodes -o wide -A
+📌 Notes
+Kubernetes upgrades in AKS are generally non-disruptive if your workloads are spread across multiple pods and nodes.
 
-Consider using node auto-upgrade if you want AKS to manage upgrades:
+For automated node upgrades in the future, enable auto-upgrade:
 
 bash
 Copy
 Edit
 az aks nodepool update \
-  --resource-group <RESOURCE_GROUP> \
-  --cluster-name <CLUSTER_NAME> \
+  --resource-group <RESOURCE_GR1OUP> \
+  --cluster-name <CLUSTER_NA1ME> \
   --name <NODEPOOL_NAME> \
-  --enable-auto-upgrade
-📘 Example
+  --enable-auto-upg1rade
+📘 Sample Commands
 bash
 Copy
 Edit
+# Upgrade control plane
 az aks upgrade \
-  --resource-group prod-rg \
+  --resource-group prod-rg 1\
   --name prod-cluster \
-  --kubernetes-version 1.29.2 \
+  --kubernetes-version 1.29.2 1\
   --yes
 
-az aks nodepool upgrade \
+# Upgrade node pool
+az aks nodepool upgrade 1\
   --resource-group prod-rg \
-  --cluster-name prod-cluster \
+  --cluster-name prod-cluster 1\
   --name systempool \
   --kubernetes-version 1.29.2 \
   --yes
